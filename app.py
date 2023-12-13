@@ -27,7 +27,7 @@ app=Flask("__name__")
 
 # Ensure the upload folder exists
 # os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-# CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 # CORS(app, supports_credentials=True) 
 
 @app.route('/', methods=['POST'])
