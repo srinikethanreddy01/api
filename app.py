@@ -102,9 +102,10 @@ def predict():
         
         response_data = {
             'prediction':sentence,
-        }       
-        return jsonify(response_data)
-
+        }  
+        response=jsonify(response_data);
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
     except Exception as e:
         return jsonify({'error': str(e)})
 
