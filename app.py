@@ -27,8 +27,27 @@ app=Flask("__name__")
 
 # Ensure the upload folder exists
 # os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-# CORS(app, supports_credentials=True) 
+# CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+CORS(app, supports_credentials=True) 
+
+tokenizer_wrapper = None
+encoder = None
+decoder = None
+def initialize_models():
+    global encoder, decoder, tokenizer_wrapper
+    tokenizer_wrapper= TokenizerWrapper(200, 1001)
+    encoder = CNN_Encoder('pretrained_visual_model', 'fine_tuned_chexnet', 2,
+                          encoder_layers=[0.4], tags_threshold=-1, num_tags=105)
+    decoder = TFGPT2LMHeadModel.from_pretrained('distilgpt2', from_pt=True, resume_download=True)
+    optimizer = tf.keras.optimizers.Adam()
+    ckpt = tf.train.Checkpoint(encoder=encoder, decoder=decoder, optimizer=optimizer)
+    ckpt_manager = tf.train.CheckpointManager(ckpt, './ckpts/CDGPT2/', max_to_keep=1)
+    if ckpt_manager.latest_checkpoint:
+        start_epoch = int(ckpt_manager.latest_checkpoint.split('-')[-1])
+        ckpt.restore(ckpt_manager.latest_checkpoint)
+        print("Restored from checkpoint: {}".format(ckpt_manager.latest_checkpoint))
+
+initialize_models()
 
 @app.route('/', methods=['POST'])
 
@@ -37,9 +56,11 @@ def hello():
 
 
 
+
 @app.route("/predict",methods=["POST"])
 def predict():
     try:
+        global encoder, decoder, tokenizer_wrapper
         print("hello im app start")
         print("hello")
         
@@ -79,12 +100,7 @@ def predict():
         sentence = tokenizer_wrapper.filter_special_words(sentence)
 
 
-        # pattern = re.compile(r'"([^"]*)"')
-        # match = pattern.search(sentence)
-        # if match:
-        #     pred = match.group(1)
-        # else:
-        #     pred="No sentence generated"
+
 
         
         response_data = {
@@ -115,14 +131,6 @@ if __name__=="__main__":
         start_epoch = int(ckpt_manager.latest_checkpoint.split('-')[-1])
         ckpt.restore(ckpt_manager.latest_checkpoint)
         print("Restored from checkpoint: {}".format(ckpt_manager.latest_checkpoint))
+    app.run(host='0.0.0.0',port=0)
 
-
-
-
-
-
-
-
-    # app.run(port=5000,debug=True)
-    app.run()
     
