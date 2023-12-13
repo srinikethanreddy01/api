@@ -44,11 +44,16 @@ def predict():
     try:
         print("hello im app start")
         print("hello")
+        print("1"*100)
         tokenizer_wrapper= TokenizerWrapper(200, 1001)
+        print("2"*100)
         encoder = CNN_Encoder('pretrained_visual_model', 'fine_tuned_chexnet', 2,
                           encoder_layers=[0.4], tags_threshold=-1, num_tags=105)
+        print("3"*100)
         decoder = TFGPT2LMHeadModel.from_pretrained('distilgpt2', from_pt=True, resume_download=True)
+        print("4"*100)
         optimizer = tf.keras.optimizers.Adam()
+        print("5"*100)
         ckpt = tf.train.Checkpoint(encoder=encoder, decoder=decoder, optimizer=optimizer)
         ckpt_manager = tf.train.CheckpointManager(ckpt, './ckpts/CDGPT2/', max_to_keep=1)
         if ckpt_manager.latest_checkpoint:
