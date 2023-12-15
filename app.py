@@ -28,7 +28,7 @@ app=Flask("__name__")
 # Ensure the upload folder exists
 # os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 CORS(app, resources={r"/predict": {"origins": "*"}}, supports_credentials=True)
-# CORS(app, supports_credentials=True) 
+CORS(app, supports_credentials=True) 
 
 
 @app.route('/', methods=['POST'])
@@ -104,13 +104,15 @@ def predict():
             'prediction':sentence,
         }  
         response=jsonify(response_data);
-        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         return response
     except Exception as e:
         return jsonify({'error': str(e)})
 
 if __name__=="__main__":
     print("server started raa chaari")
-    app.run(host='0.0.0.0',port=0)
+    app.run()
+    # app.run(host='0.0.0.0',port=0)
 
     
